@@ -2,7 +2,6 @@
 #include "pathfinding.h"
 
 int main() {
-    int main() {
     // Define the grid array (example: 11 rows, 9 columns)
     int grid[ROWS][COLS] = {
         { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -29,4 +28,4 @@ int main() {
 
     return 0;
 }
-}
+
