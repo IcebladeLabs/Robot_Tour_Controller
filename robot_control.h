@@ -1,6 +1,10 @@
 #ifndef ROBOT_CONTROL_H
 #define ROBOT_CONTROL_H
 
+
+// resetEncoders(), getLeftEncoder(), getRightEncoder(), setMotorSpeeds(), and stopMotors() would need to be adapted to hardware specific methods.
+
+
 // Include necessary libraries
 #include <cmath>
 
