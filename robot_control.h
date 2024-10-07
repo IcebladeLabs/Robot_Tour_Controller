@@ -2,7 +2,7 @@
 #define ROBOT_CONTROL_H
 
 
-// resetEncoders(), getLeftEncoder(), getRightEncoder(), setMotorSpeeds(), and stopMotors() would need to be adapted to hardware specific methods.
+// resetEncoders(), getLeftEncoder(), getRightEncoder(), setMotorSpeeds(), and stopMotors() would need to be adapted to hardware specific methods, as well as MAX_WHEEL_SPEED.
 
 
 // Include necessary libraries
@@ -80,9 +80,13 @@ inline void turnRobot(int direction, float wheel_base_width, float wheel_diamete
 }
 
 // Move forward a specific distance
-inline void moveForward(float distance_cm, float wheel_diameter, int encoder_counts_per_rev, int target_speed) {
+inline void moveForward(float distance_cm, float wheel_diameter, int encoder_counts_per_rev, float time_seconds) {
+    // Calculate the target speed based on distance and time
+    float speed_cm_per_sec = distance_cm / time_seconds; // Calculate speed in cm/s
+    int target_speed = static_cast<int>(speed_cm_per_sec * 255.0 / MAX_WHEEL_SPEED); // Scale to PWM value
+
     // Calculate encoder target based on wheel circumference
-    int encoder_target = (distance_cm / (M_PI * wheel_diameter)) * encoder_counts_per_rev;
+    int encoder_target = static_cast<int>((distance_cm / (M_PI * wheel_diameter)) * encoder_counts_per_rev);
 
     // Reset encoders and PID state
     resetEncoders();
@@ -96,7 +100,7 @@ inline void moveForward(float distance_cm, float wheel_diameter, int encoder_cou
         int left_motor_speed = PID(encoder_target, left_encoder);
         int right_motor_speed = PID(encoder_target, right_encoder);
 
-        // Limit motor speed to the target
+        // Limit motor speed to the target speed
         left_motor_speed = std::min(left_motor_speed, target_speed);
         right_motor_speed = std::min(right_motor_speed, target_speed);
 
