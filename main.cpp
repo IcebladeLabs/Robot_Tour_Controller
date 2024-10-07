@@ -1,19 +1,32 @@
 #include "robot_control.h"
+#include "robot_navigation.h"
 
 int main() {
-    // Example usage
-    float wheel_base_width = 15.0;    // Distance between wheels in cm
-    float wheel_diameter = 7.0;       // Wheel diameter in cm
-    int encoder_counts_per_rev = 360; // Encoder counts per wheel revolution
+    int main() {
+    // Define the grid array (example: 11 rows, 9 columns)
+    int grid[ROWS][COLS] = {
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        { 0, 1, 1, 1, 1, 1, 1, 1, 0 },
+        { 0, 1, 0, 0, 0, 0, 0, 1, 0 },
+        { 0, 1, 0, 1, 1, 1, 0, 1, 0 },
+        { 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+        { 0, 1, 0, 1, 0, 1, 0, 1, 0 },
+        { 0, 1, 1, 1, 0, 1, 1, 1, 0 },
+        { 0, 0, 0, 1, 0, 0, 0, 1, 0 },
+        { 2, 1, 2, 1, 3, 1, 2, 1, 2 },
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+        { 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    };
 
-    // Turn right (90 degrees)
-    turnRobot(1, wheel_base_width, wheel_diameter, encoder_counts_per_rev);
+    // Get the instructions to move through all '2's and reach '3'
+    std::vector<int> instructions = findPath(grid);
 
-    // Move forward 50 cm at max speed of 100
-    moveForward(50.0, wheel_diameter, encoder_counts_per_rev, 100);
+    // Print the instructions
+    for (int instruction : instructions) {
+        std::cout << instruction << " ";
+    }
+    std::cout << std::endl;
 
-    // Turn left (90 degrees)
-    turnRobot(-1, wheel_base_width, wheel_diameter, encoder_counts_per_rev);
-    
     return 0;
+}
 }
