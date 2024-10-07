@@ -15,23 +15,25 @@ struct Position {
     int x, y;
 };
 
-// Function to find all '2' positions and the '3' endpoint
-std::pair<std::vector<Position>, Position> findTwoAndThreePoints(int grid[ROWS][COLS]) {
-    std::vector<Position> twos;
-    Position endpoint = {-1, -1};
+// Function to find the Start (2), Intermediary Gates (3), and End Point (4)
+std::pair<std::vector<Position>, std::pair<Position, Position>> findStartGatesAndEnd(int grid[ROWS][COLS]) {
+    std::vector<Position> gates;
+    Position start = {-1, -1};
+    Position end = {-1, -1};
 
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLS; j++) {
             if (grid[i][j] == 2) {
-                twos.push_back({i, j});
-            }
-            else if (grid[i][j] == 3) {
-                endpoint = {i, j};
+                start = {i, j};  // Start point
+            } else if (grid[i][j] == 3) {
+                gates.push_back({i, j});  // Intermediary gates
+            } else if (grid[i][j] == 4) {
+                end = {i, j};  // End point
             }
         }
     }
 
-    return {twos, endpoint};
+    return {gates, {start, end}};
 }
 
 // Function to calculate the path from one point to another using BFS
@@ -114,23 +116,22 @@ int calculateDistance(Position a, Position b) {
     return abs(a.x - b.x) + abs(a.y - b.y);
 }
 
-// Function to determine the order to visit all '2's efficiently using nearest-neighbor heuristic
-std::vector<Position> findEfficientPathForTwos(const std::vector<Position>& twos) {
+// Function to determine the order to visit all gates ('3's) efficiently using nearest-neighbor heuristic
+std::vector<Position> findEfficientPathForGates(const std::vector<Position>& gates, Position start) {
     std::vector<Position> orderedPath;
-    std::vector<bool> visited(twos.size(), false);
+    std::vector<bool> visited(gates.size(), false);
 
-    Position current = twos[0];  // Start from the first '2'
+    Position current = start;  // Start from the start point
     orderedPath.push_back(current);
-    visited[0] = true;
 
-    // Iterate through all '2' positions to find the most efficient path
-    for (size_t i = 1; i < twos.size(); i++) {
+    // Iterate through all gate positions to find the most efficient path
+    for (size_t i = 0; i < gates.size(); i++) {
         int nearestIdx = -1;
         int nearestDist = INT_MAX;
 
-        for (size_t j = 0; j < twos.size(); j++) {
+        for (size_t j = 0; j < gates.size(); j++) {
             if (!visited[j]) {
-                int dist = calculateDistance(current, twos[j]);
+                int dist = calculateDistance(current, gates[j]);
                 if (dist < nearestDist) {
                     nearestDist = dist;
                     nearestIdx = j;
@@ -138,8 +139,8 @@ std::vector<Position> findEfficientPathForTwos(const std::vector<Position>& twos
             }
         }
 
-        // Move to the nearest unvisited '2'
-        current = twos[nearestIdx];
+        // Move to the nearest unvisited gate
+        current = gates[nearestIdx];
         orderedPath.push_back(current);
         visited[nearestIdx] = true;
     }
@@ -147,24 +148,26 @@ std::vector<Position> findEfficientPathForTwos(const std::vector<Position>& twos
     return orderedPath;
 }
 
-// Function to move through all '2's and then move to '3'
+// Function to move from start (2) through all gates (3), and then to the endpoint (4)
 std::vector<int> findPath(int grid[ROWS][COLS]) {
     std::vector<int> totalInstructions; // To store the overall instructions
 
-    // Get the list of '2' positions and the '3' endpoint
-    auto [twos, endpoint] = findTwoAndThreePoints(grid);
+    // Get the start point (2), intermediary gates (3), and endpoint (4)
+    auto [gates, startEnd] = findStartGatesAndEnd(grid);
+    Position start = startEnd.first;
+    Position end = startEnd.second;
 
-    // Get the efficient path through all '2's
-    std::vector<Position> orderedTwos = findEfficientPathForTwos(twos);
+    // Get the efficient path through all gates
+    std::vector<Position> orderedGates = findEfficientPathForGates(gates, start);
 
-    // Move through all '2's
-    for (size_t i = 0; i < orderedTwos.size() - 1; i++) {
-        std::vector<int> pathInstructions = bfsPath(grid, orderedTwos[i], orderedTwos[i + 1]);
+    // Move through all gates
+    for (size_t i = 0; i < orderedGates.size() - 1; i++) {
+        std::vector<int> pathInstructions = bfsPath(grid, orderedGates[i], orderedGates[i + 1]);
         totalInstructions.insert(totalInstructions.end(), pathInstructions.begin(), pathInstructions.end());
     }
 
-    // After visiting all '2's, move to the '3' endpoint
-    std::vector<int> finalPathInstructions = bfsPath(grid, orderedTwos.back(), endpoint);
+    // After visiting all gates, move to the '4' endpoint
+    std::vector<int> finalPathInstructions = bfsPath(grid, orderedGates.back(), end);
     totalInstructions.insert(totalInstructions.end(), finalPathInstructions.begin(), finalPathInstructions.end());
 
     return totalInstructions; // Return the complete list of instructions
